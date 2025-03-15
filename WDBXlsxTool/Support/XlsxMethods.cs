@@ -39,7 +39,7 @@ namespace WDBXlsxTool.Support
                     break;
 
                 case CellObjects.Float:
-                    cell.SetCellValue((double)Convert.ToDouble(value));
+                    cell.SetCellValue(Convert.ToSingle(value.ToString()));
                     break;
 
                 case CellObjects.String:

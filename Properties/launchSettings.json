@@ -2,7 +2,7 @@
   "profiles": {
     "WDBXlsxTool": {
       "commandName": "Project",
-      "commandLineArgs": "-ff131 -x \"S:\\Modding projects\\wdb_test\\savepoint.wdb\""
+      "commandLineArgs": "-ff131 -x \"S:\\Modding projects\\wdb_test\\fieldcamera.wdb\""
     }
   }
 }
