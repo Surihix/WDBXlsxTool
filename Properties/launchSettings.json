@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WDBXlsxTool": {
+      "commandName": "Project",
+      "commandLineArgs": "-ff131 -x \"S:\\Modding projects\\shop.wdb\""
+    }
+  }
+}
