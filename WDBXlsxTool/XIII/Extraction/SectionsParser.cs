@@ -102,7 +102,7 @@ namespace WDBXlsxTool.XIII.Extraction
 
             currentRow = currentSheet.CreateRow(0);
             XlsxMethods.WriteToCell(currentRow, 0, "records", XlsxMethods.CellObjects.String, false);
-            XlsxMethods.WriteToCell(currentRow, 1, wdbVars.RecordCount, XlsxMethods.CellObjects.UInt, false);
+            XlsxMethods.WriteToCell(currentRow, 1, wdbVars.RecordCount, XlsxMethods.CellObjects.UInt32, false);
 
             currentRow = currentSheet.CreateRow(1);
             XlsxMethods.WriteToCell(currentRow, 0, "IsKnown", XlsxMethods.CellObjects.String, false);
@@ -148,7 +148,7 @@ namespace WDBXlsxTool.XIII.Extraction
 
             // Write version data
             currentSheet = wdbWorkbook.CreateSheet(wdbVars.VersionSectionName);
-            XlsxMethods.WriteToCell(currentSheet.CreateRow(0), 0, SharedMethods.DeriveUIntFromSectionData(wdbVars.VersionData, 0, true), XlsxMethods.CellObjects.UInt, false);
+            XlsxMethods.WriteToCell(currentSheet.CreateRow(0), 0, SharedMethods.DeriveUIntFromSectionData(wdbVars.VersionData, 0, true), XlsxMethods.CellObjects.UInt32, false);
             XlsxMethods.AutoSizeSheet(currentSheet, 1);
 
             // Write structitem data
@@ -189,7 +189,7 @@ namespace WDBXlsxTool.XIII.Extraction
                 listSectionValues.Add(listValue);
 
                 currentRow = currentSheet.CreateRow(currentRowIndex);
-                XlsxMethods.WriteToCell(currentRow, 0, listValue, XlsxMethods.CellObjects.UInt, false);
+                XlsxMethods.WriteToCell(currentRow, 0, listValue, XlsxMethods.CellObjects.UInt32, false);
                 currentRowIndex++;
 
                 listIndex += 4;

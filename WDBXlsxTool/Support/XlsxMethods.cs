@@ -46,7 +46,7 @@ namespace WDBXlsxTool.Support
                     cell.SetCellValue((string)value);
                     break;
 
-                case CellObjects.UInt:
+                case CellObjects.UInt32:
                     cell.SetCellValue(Convert.ToUInt32(value));
                     break;
 
@@ -74,7 +74,7 @@ namespace WDBXlsxTool.Support
             Int,
             Float,
             String,
-            UInt,
+            UInt32,
             UInt64,
             Boolean
         }
