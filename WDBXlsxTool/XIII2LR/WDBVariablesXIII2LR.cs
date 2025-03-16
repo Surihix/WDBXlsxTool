@@ -15,7 +15,8 @@
         public List<string> NumStringFields = new();
         public List<string> ProcessStringsList = new();
         public Dictionary<string, List<string>> StrArrayDict = new();
-        public List<int> StrtypelistValues = new();
+        public List<uint> StrtypelistValues = new();
+        public List<uint> TypelistValues = new();
         public uint RecordCountWithSections;
         public Dictionary<string, List<object>> RecordsDataDict = new();
         public Dictionary<string, uint> ProcessedStringsDict = new();

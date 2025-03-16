@@ -136,12 +136,11 @@ namespace WDBXlsxTool.XIII.Extraction
 
             // Parse and write strtypelist data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.StrtypelistSectionName);
-            wdbVars.StrtypelistValues = WriteListSectionValues(wdbVars.StrtypelistData, currentSheet);
+            wdbVars.StrtypelistValues = XlsxWriterHelpers.WriteListSectionValues(wdbVars.StrtypelistData, currentSheet);
 
             // Parse and write typelist data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.TypelistSectionName);
-            wdbVars.TypelistValues = WriteListSectionValues(wdbVars.TypelistData, currentSheet);
-
+            wdbVars.TypelistValues = XlsxWriterHelpers.WriteListSectionValues(wdbVars.TypelistData, currentSheet);
 
             // Write version data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.VersionSectionName);
@@ -162,34 +161,6 @@ namespace WDBXlsxTool.XIII.Extraction
 
                 XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
             }
-        }
-
-
-        private static List<uint> WriteListSectionValues(byte[] listSectionData, IXLWorksheet currentSheet)
-        {
-            var listSectionValues = new List<uint>();
-
-            var listIndex = 0;
-            var currentlistData = new byte[4];
-            var listValueCount = listSectionData.Length / 4;
-            uint listValue;
-            var currentRow = 1;
-
-            for (int s = 0; s < listValueCount; s++)
-            {
-                Array.ConstrainedCopy(listSectionData, listIndex, currentlistData, 0, 4);
-                Array.Reverse(currentlistData);
-                listValue = BitConverter.ToUInt32(currentlistData, 0);
-
-                listSectionValues.Add(listValue);
-
-                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxWriterHelpers.CellObjects.UInt32, listValue, false);
-                currentRow++;
-
-                listIndex += 4;
-            }
-
-            return listSectionValues;
         }
     }
 }

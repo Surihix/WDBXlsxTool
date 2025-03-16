@@ -1,6 +1,6 @@
 ﻿using ClosedXML.Excel;
 
-namespace WDBXlsxTool.XIII.Extraction
+namespace WDBXlsxTool.Support
 {
     internal class XlsxWriterHelpers
     {
@@ -53,6 +53,34 @@ namespace WDBXlsxTool.XIII.Extraction
         {
             xLWorksheet.Rows().AdjustToContents();
             xLWorksheet.Columns().AdjustToContents();
+        }
+
+
+        public static List<uint> WriteListSectionValues(byte[] listSectionData, IXLWorksheet currentSheet)
+        {
+            var listSectionValues = new List<uint>();
+
+            var listIndex = 0;
+            var currentlistData = new byte[4];
+            var listValueCount = listSectionData.Length / 4;
+            uint listValue;
+            var currentRow = 1;
+
+            for (int s = 0; s < listValueCount; s++)
+            {
+                Array.ConstrainedCopy(listSectionData, listIndex, currentlistData, 0, 4);
+                Array.Reverse(currentlistData);
+                listValue = BitConverter.ToUInt32(currentlistData, 0);
+
+                listSectionValues.Add(listValue);
+
+                WriteToCell(currentSheet, currentRow, 1, CellObjects.UInt32, listValue, false);
+                currentRow++;
+
+                listIndex += 4;
+            }
+
+            return listSectionValues;
         }
     }
 }
