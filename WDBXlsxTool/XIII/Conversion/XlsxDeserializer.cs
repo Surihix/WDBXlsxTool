@@ -1,16 +1,15 @@
-﻿using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
+﻿using ClosedXML.Excel;
 using WDBXlsxTool.Support;
 
 namespace WDBXlsxTool.XIII.Conversion
 {
     internal class XlsxDeserializer
     {
-        private static int SheetIndex = 0;
+        private static int SheetIndex = 1;
 
         public static void DeserializeData(string inXlsxFile, WDBVariablesXIII wdbVars)
         {
-            using (var wdbWorkbook = new XSSFWorkbook(inXlsxFile))
+            using (var wdbWorkbook = new XLWorkbook(inXlsxFile))
             {
                 Console.WriteLine("Deserializing main sections....");
                 Console.WriteLine("");
@@ -23,23 +22,24 @@ namespace WDBXlsxTool.XIII.Conversion
         }
 
 
-        private static void DeserializeMainSections(XSSFWorkbook wdbWorkbook, WDBVariablesXIII wdbVars)
+        private static void DeserializeMainSections(XLWorkbook wdbWorkbook, WDBVariablesXIII wdbVars)
         {
-            ISheet currentSheet;
-            IRow currentRow;
+            CheckIfSheetExists(wdbWorkbook, "!!info");
+            CheckIfSheetExists(wdbWorkbook, wdbVars.StrtypelistSectionName);
+            CheckIfSheetExists(wdbWorkbook, wdbVars.TypelistSectionName);
+            CheckIfSheetExists(wdbWorkbook, wdbVars.VersionSectionName);
+
+            IXLWorksheet currentSheet;
 
             // Get recordCount and determine
             // if the file is known
-            currentSheet = wdbWorkbook.GetSheet("!!info");
+            currentSheet = wdbWorkbook.Worksheet("!!info");
             SheetIndex++;
-            currentRow = currentSheet.GetRow(0);
-            wdbVars.RecordCount = Convert.ToUInt32(currentRow.GetCell(1).ToString());
-
-            currentRow = currentSheet.GetRow(1);
-            wdbVars.IsKnown = Convert.ToBoolean(currentRow.GetCell(1).ToString());
+            wdbVars.RecordCount = Convert.ToUInt32(currentSheet.Cell(1, 2).Value.ToString());
+            wdbVars.IsKnown = Convert.ToBoolean(currentSheet.Cell(2, 2).Value.ToString());
 
             // Get strtypelist values
-            currentSheet = wdbWorkbook.GetSheet(wdbVars.StrtypelistSectionName);
+            currentSheet = wdbWorkbook.Worksheet(wdbVars.StrtypelistSectionName);
             SheetIndex++;
             wdbVars.StrtypelistValues = GetValuesFromListSection(currentSheet);
 
@@ -54,7 +54,7 @@ namespace WDBXlsxTool.XIII.Conversion
             wdbVars.RecordCountWithSections++;
 
             // Get typelist values
-            currentSheet = wdbWorkbook.GetSheet(wdbVars.TypelistSectionName);
+            currentSheet = wdbWorkbook.Worksheet(wdbVars.TypelistSectionName);
             SheetIndex++;
             wdbVars.TypelistValues = GetValuesFromListSection(currentSheet);
 
@@ -64,10 +64,9 @@ namespace WDBXlsxTool.XIII.Conversion
             wdbVars.RecordCountWithSections++;
 
             // Get version value
-            currentSheet = wdbWorkbook.GetSheet(wdbVars.VersionSectionName);
+            currentSheet = wdbWorkbook.Worksheet(wdbVars.VersionSectionName);
             SheetIndex++;
-            currentRow = currentSheet.GetRow(0);
-            wdbVars.VersionData = BitConverter.GetBytes(Convert.ToUInt32(currentRow.GetCell(0).ToString()));
+            wdbVars.VersionData = BitConverter.GetBytes(Convert.ToUInt32(currentSheet.Cell(1, 1).Value.ToString()));
             Array.Reverse(wdbVars.VersionData);
 
             wdbVars.RecordCountWithSections++;
@@ -78,24 +77,27 @@ namespace WDBXlsxTool.XIII.Conversion
             // if the file is known
             if (wdbVars.IsKnown)
             {
-                currentSheet = wdbWorkbook.GetSheet(wdbVars.StructItemSectionName);
+                CheckIfSheetExists(wdbWorkbook, wdbVars.StructItemSectionName);
+
+                currentSheet = wdbWorkbook.Worksheet(wdbVars.StructItemSectionName);
                 SheetIndex++;
-                int rowIndex = 0;
-                int cellIndex = 0;
+
+                string currentVal;
+                var currentRow = 1;
                 var structItemValues = new List<string>();
 
                 while (true)
                 {
-                    currentRow = currentSheet.GetRow(rowIndex);
+                    currentVal = currentSheet.Cell(currentRow, 1).Value.ToString();
 
-                    if (currentRow == null)
+                    if (string.IsNullOrEmpty(currentVal))
                     {
                         break;
                     }
 
-                    structItemValues.Add(Convert.ToString(currentRow.GetCell(cellIndex)));
+                    structItemValues.Add(currentVal.ToString());
 
-                    rowIndex++;
+                    currentRow++;
                 }
 
                 wdbVars.Fields = structItemValues.ToArray();
@@ -115,50 +117,54 @@ namespace WDBXlsxTool.XIII.Conversion
             }
         }
 
-        private static List<uint> GetValuesFromListSection(ISheet currentSheet)
+        private static void CheckIfSheetExists(XLWorkbook workbook, string sheetName)
         {
+            if (workbook.TryGetWorksheet(sheetName, out _) == false)
+            {
+                SharedMethods.ErrorExit($"Missing {sheetName} in specified xlsx file");
+            }
+        }
+
+        private static List<uint> GetValuesFromListSection(IXLWorksheet currentSheet)
+        {
+            string currentVal;
+            var currentRow = 1;
             var listSectionValues = new List<uint>();
-            IRow currentRow;
-            int rowIndex = 0;
-            int cellIndex = 0;
 
             while (true)
             {
-                currentRow = currentSheet.GetRow(rowIndex);
+                currentVal = currentSheet.Cell(currentRow, 1).Value.ToString();
 
-                if (currentRow == null)
+                if (string.IsNullOrEmpty(currentVal))
                 {
                     break;
                 }
 
-                listSectionValues.Add(Convert.ToUInt32(currentRow.GetCell(cellIndex).ToString()));
+                listSectionValues.Add(Convert.ToUInt32(currentVal));
 
-                rowIndex++;
+                currentRow++;
             }
 
             return listSectionValues;
         }
 
 
-        public static void DeserializeRecords(XSSFWorkbook wdbWorkbook, WDBVariablesXIII wdbVars)
+        private static void DeserializeRecords(XLWorkbook wdbWorkbook, WDBVariablesXIII wdbVars)
         {
-            ISheet currentSheet;
-            IRow currentRow;
-            int rowIndex = 1;
-            int cellIndex;
+            var currentSheet = wdbWorkbook.Worksheet(SheetIndex);
 
-            currentSheet = wdbWorkbook.GetSheetAt(SheetIndex);
+            var currentRow = 2;
+            int currentColumn;
 
-            var recordName = string.Empty;
+            string recordName;
             string fieldName;
 
             for (int i = 0; i < wdbVars.RecordCount; i++)
             {
-                cellIndex = 0;
+                currentColumn = 1;
 
-                currentRow = currentSheet.GetRow(rowIndex);
-                recordName = Convert.ToString(currentRow.GetCell(cellIndex));
-                cellIndex++;
+                recordName = currentSheet.Cell(currentRow, currentColumn).Value.ToString();
+                currentColumn++;
 
                 var currentDataList = new List<object>();
 
@@ -171,14 +177,14 @@ namespace WDBXlsxTool.XIII.Conversion
 
                         if (fieldName.StartsWith("s"))
                         {
-                            currentDataList.Add(Convert.ToString(currentRow.GetCell(cellIndex)));
+                            currentDataList.Add(currentSheet.Cell(currentRow, currentColumn).Value.ToString());
                         }
                         else
                         {
-                            currentDataList.Add(Convert.ToDouble(currentRow.GetCell(cellIndex).ToString()));
+                            currentDataList.Add(Convert.ToDecimal(currentSheet.Cell(currentRow, currentColumn).Value.ToString()));
                         }
 
-                        cellIndex++;
+                        currentColumn++;
                     }
                 }
                 else
@@ -188,29 +194,29 @@ namespace WDBXlsxTool.XIII.Conversion
                         switch (wdbVars.StrtypelistValues[f])
                         {
                             case 0:
-                                currentDataList.Add(Convert.ToString(currentRow.GetCell(cellIndex)));
+                                currentDataList.Add(currentSheet.Cell(currentRow, currentColumn).Value.ToString());
                                 break;
 
                             case 1:
-                                currentDataList.Add(Convert.ToDouble(currentRow.GetCell(cellIndex).ToString()));
+                                currentDataList.Add(currentSheet.Cell(currentRow, currentColumn).Value.ToString());
                                 break;
 
                             case 2:
-                                currentDataList.Add(Convert.ToString(currentRow.GetCell(cellIndex)));
+                                currentDataList.Add(currentSheet.Cell(currentRow, currentColumn).Value.ToString());
                                 break;
 
                             case 3:
-                                currentDataList.Add(Convert.ToUInt32(currentRow.GetCell(cellIndex).ToString()));
+                                currentDataList.Add(Convert.ToUInt32(currentSheet.Cell(currentRow, currentColumn).Value.ToString()));
                                 break;
                         }
 
-                        cellIndex++;
+                        currentColumn++;
                     }
                 }
 
                 wdbVars.RecordsDataDict.Add(recordName, currentDataList);
 
-                rowIndex++;
+                currentRow++;
             }
         }
     }

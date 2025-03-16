@@ -1,48 +1,43 @@
-﻿using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
+﻿using ClosedXML.Excel;
 using WDBXlsxTool.Support;
 
 namespace WDBXlsxTool.XIII.Extraction
 {
     internal class RecordsParser
     {
-        public static void ParseRecordsWithFields(BinaryReader wdbReader, WDBVariablesXIII wdbVars, XSSFWorkbook wdbWorkbook)
+        public static void ParseRecordsWithFields(BinaryReader wdbReader, WDBVariablesXIII wdbVars, XLWorkbook wdbWorkbook)
         {
-            IRow currentRow;
-            int currentRowIndex;
-            int cellIndex;
-            var currentSheet = wdbWorkbook.CreateSheet(wdbVars.SheetName);
+            var currentSheet = wdbWorkbook.AddWorksheet(wdbVars.SheetName);
 
             // Fill up all the fields
-            currentRow = currentSheet.CreateRow(0);
-            XlsxMethods.WriteToCell(currentRow, 0, "Records", XlsxMethods.CellObjects.String, true);
-            cellIndex = 1;
+            XlsxWriterHelpers.WriteToCell(currentSheet, 1, 1, XlsxWriterHelpers.CellObjects.String, "Records", true);
+
+            var currentColumn = 2;  // horizontal
 
             foreach (var field in wdbVars.Fields)
             {
-                XlsxMethods.WriteToCell(currentRow, cellIndex, field, XlsxMethods.CellObjects.String, true);
-                cellIndex++;
+                XlsxWriterHelpers.WriteToCell(currentSheet, 1, currentColumn, XlsxWriterHelpers.CellObjects.String, field, true);
+                currentColumn++;
             }
 
             // Process each record's data
             var sectionPos = wdbReader.BaseStream.Position;
             string currentRecordName;
+            var currentRow = 2;  // vertical
             byte[] currentRecordData;
             var strtypelistIndex = 0;
             var currentRecordDataIndex = 0;
-            currentRowIndex = 1;
 
             for (int r = 0; r < wdbVars.RecordCount; r++)
             {
-                cellIndex = 0;
-                currentRow = currentSheet.CreateRow(currentRowIndex);
+                currentColumn = 1;
 
                 _ = wdbReader.BaseStream.Position = sectionPos;
                 currentRecordName = wdbReader.ReadBytesString(16, false);
 
                 Console.WriteLine($"Record: {currentRecordName}");
-                XlsxMethods.WriteToCell(currentRow, cellIndex, currentRecordName, XlsxMethods.CellObjects.String, false);
-                cellIndex++;
+                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.String, currentRecordName, false);
+                currentColumn++;
 
                 currentRecordData = SharedMethods.SaveSectionData(wdbReader, false);
 
@@ -75,8 +70,8 @@ namespace WDBXlsxTool.XIII.Extraction
                                             fieldBitsToProcess = 0;
 
                                             Console.WriteLine($"{wdbVars.Fields[f]}: {iTypedataVal}");
-                                            XlsxMethods.WriteToCell(currentRow, cellIndex, iTypedataVal, XlsxMethods.CellObjects.Int, false);
-                                            cellIndex++;
+                                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.Int, iTypedataVal, false);
+                                            currentColumn++;
 
                                             break;
                                         }
@@ -94,8 +89,8 @@ namespace WDBXlsxTool.XIII.Extraction
                                             fieldBitsToProcess -= fieldNum;
 
                                             Console.WriteLine($"{wdbVars.Fields[f]}: {iTypedataVal}");
-                                            XlsxMethods.WriteToCell(currentRow, cellIndex, iTypedataVal, XlsxMethods.CellObjects.Int, false);
-                                            cellIndex++;
+                                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.Int, iTypedataVal, false);
+                                            currentColumn++;
 
                                             if (fieldBitsToProcess != 0)
                                             {
@@ -112,8 +107,8 @@ namespace WDBXlsxTool.XIII.Extraction
                                             fieldBitsToProcess = 0;
 
                                             Console.WriteLine($"{wdbVars.Fields[f]}: {uTypeDataVal}");
-                                            XlsxMethods.WriteToCell(currentRow, cellIndex, uTypeDataVal, XlsxMethods.CellObjects.UInt32, false);
-                                            cellIndex++;
+                                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.UInt32, uTypeDataVal, false);
+                                            currentColumn++;
 
                                             break;
                                         }
@@ -131,8 +126,8 @@ namespace WDBXlsxTool.XIII.Extraction
                                             fieldBitsToProcess -= fieldNum;
 
                                             Console.WriteLine($"{wdbVars.Fields[f]}: {uTypeDataVal}");
-                                            XlsxMethods.WriteToCell(currentRow, cellIndex, uTypeDataVal, XlsxMethods.CellObjects.UInt32, false);
-                                            cellIndex++;
+                                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.UInt32, uTypeDataVal, false);
+                                            currentColumn++;
 
                                             if (fieldBitsToProcess != 0)
                                             {
@@ -149,8 +144,8 @@ namespace WDBXlsxTool.XIII.Extraction
                                             fieldBitsToProcess = 0;
 
                                             Console.WriteLine($"{wdbVars.Fields[f]}: {fTypeDataVal}");
-                                            XlsxMethods.WriteToCell(currentRow, cellIndex, fTypeDataVal, XlsxMethods.CellObjects.Int, false);
-                                            cellIndex++;
+                                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.Int, fTypeDataVal, false);
+                                            currentColumn++;
 
                                             break;
                                         }
@@ -168,8 +163,8 @@ namespace WDBXlsxTool.XIII.Extraction
                                             fieldBitsToProcess -= fieldNum;
 
                                             Console.WriteLine($"{wdbVars.Fields[f]}: {fTypeDataVal}");
-                                            XlsxMethods.WriteToCell(currentRow, cellIndex, fTypeDataVal, XlsxMethods.CellObjects.Int, false);
-                                            cellIndex++;
+                                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.Int, fTypeDataVal, false);
+                                            currentColumn++;
 
                                             if (fieldBitsToProcess != 0)
                                             {
@@ -189,8 +184,8 @@ namespace WDBXlsxTool.XIII.Extraction
                             var floatDataVal = SharedMethods.DeriveFloatFromSectionData(currentRecordData, currentRecordDataIndex, true);
 
                             Console.WriteLine($"{wdbVars.Fields[f]}: {floatDataVal}");
-                            XlsxMethods.WriteToCell(currentRow, cellIndex, floatDataVal, XlsxMethods.CellObjects.Float, false);
-                            cellIndex++;
+                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.Float, floatDataVal, false);
+                            currentColumn++;
 
                             strtypelistIndex++;
                             currentRecordDataIndex += 4;
@@ -202,8 +197,8 @@ namespace WDBXlsxTool.XIII.Extraction
                             var derivedString = SharedMethods.DeriveStringFromArray(wdbVars.StringsData, (int)stringDataOffset);
 
                             Console.WriteLine($"{wdbVars.Fields[f]}: {derivedString}");
-                            XlsxMethods.WriteToCell(currentRow, cellIndex, derivedString, XlsxMethods.CellObjects.String, false);
-                            cellIndex++;
+                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.String, derivedString, false);
+                            currentColumn++;
 
                             strtypelistIndex++;
                             currentRecordDataIndex += 4;
@@ -220,10 +215,10 @@ namespace WDBXlsxTool.XIII.Extraction
                                 var ulTypeDataVal = BitConverter.ToUInt64(processArray, 0);
 
                                 Console.WriteLine($"{wdbVars.Fields[f]}(uint64): {ulTypeDataVal}");
-                                XlsxMethods.WriteToCell(currentRow, cellIndex, ulTypeDataVal, XlsxMethods.CellObjects.UInt64, false);
-                                cellIndex++;
+                                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.UInt64, ulTypeDataVal, false);
+                                currentColumn++;
 
-                                strtypelistIndex++;
+                                strtypelistIndex += 2;
                                 currentRecordDataIndex += 8;
                                 break;
                             }
@@ -231,8 +226,8 @@ namespace WDBXlsxTool.XIII.Extraction
                             var uintDataVal = SharedMethods.DeriveUIntFromSectionData(currentRecordData, currentRecordDataIndex, true);
 
                             Console.WriteLine($"{wdbVars.Fields[f]}: {uintDataVal}");
-                            XlsxMethods.WriteToCell(currentRow, cellIndex, uintDataVal, XlsxMethods.CellObjects.UInt32, false);
-                            cellIndex++;
+                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.UInt32, uintDataVal, false);
+                            currentColumn++;
 
                             strtypelistIndex++;
                             currentRecordDataIndex += 4;
@@ -240,8 +235,7 @@ namespace WDBXlsxTool.XIII.Extraction
                     }
                 }
 
-                currentRowIndex++;
-
+                currentRow++;
                 Console.WriteLine("");
 
                 strtypelistIndex = 0;
@@ -249,71 +243,70 @@ namespace WDBXlsxTool.XIII.Extraction
                 sectionPos += 32;
             }
 
-            XlsxMethods.AutoSizeSheet(currentSheet, (int)wdbVars.RecordCount + 1);
+            XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
         }
 
 
-        public static void ParseRecordsWithoutFields(BinaryReader wdbReader, WDBVariablesXIII wdbVars, XSSFWorkbook wdbWorkbook)
+        public static void ParseRecordsWithoutFields(BinaryReader wdbReader, WDBVariablesXIII wdbVars, XLWorkbook wdbWorkbook)
         {
-            IRow currentRow;
-            int currentRowIndex;
-            int cellIndex;
-            var currentSheet = wdbWorkbook.CreateSheet(wdbVars.WDBName);
+            var currentSheet = wdbWorkbook.AddWorksheet(wdbVars.WDBName);
 
             // Fill up all the fields
-            currentRow = currentSheet.CreateRow(0);
-            XlsxMethods.WriteToCell(currentRow, 0, "Records", XlsxMethods.CellObjects.String, true);
-            cellIndex = 1;
+            XlsxWriterHelpers.WriteToCell(currentSheet, 1, 1, XlsxWriterHelpers.CellObjects.String, "Records", true);
 
             var bitpackedFieldCounter = 0;
             var floatFieldCounter = 0;
             var stringFieldCounter = 0;
             var uintFieldCounter = 0;
 
+            var currentColumn = 2;  // horizontal
+
             foreach (var strtypelistValue in wdbVars.StrtypelistValues)
             {
                 switch (strtypelistValue)
                 {
                     case 0:
-                        XlsxMethods.WriteToCell(currentRow, cellIndex, $"bitpacked-field_{bitpackedFieldCounter}", XlsxMethods.CellObjects.String, true);
+                        XlsxWriterHelpers.WriteToCell(currentSheet, 1, currentColumn, XlsxWriterHelpers.CellObjects.String, $"bitpacked-field_{bitpackedFieldCounter}", true);
                         bitpackedFieldCounter++;
                         break;
+
                     case 1:
-                        XlsxMethods.WriteToCell(currentRow, cellIndex, $"float-field_{floatFieldCounter}", XlsxMethods.CellObjects.String, true);
+                        XlsxWriterHelpers.WriteToCell(currentSheet, 1, currentColumn, XlsxWriterHelpers.CellObjects.String, $"float-field_{floatFieldCounter}", true);
                         floatFieldCounter++;
                         break;
+
                     case 2:
-                        XlsxMethods.WriteToCell(currentRow, cellIndex, $"!!string-field_{stringFieldCounter}", XlsxMethods.CellObjects.String, true);
+                        XlsxWriterHelpers.WriteToCell(currentSheet, 1, currentColumn, XlsxWriterHelpers.CellObjects.String, $"!!string-field_{stringFieldCounter}", true);
                         stringFieldCounter++;
                         break;
+
                     case 3:
-                        XlsxMethods.WriteToCell(currentRow, cellIndex, $"uint-field_{uintFieldCounter}", XlsxMethods.CellObjects.String, true);
+                        XlsxWriterHelpers.WriteToCell(currentSheet, 1, currentColumn, XlsxWriterHelpers.CellObjects.String, $"uint-field_{uintFieldCounter}", true);
                         uintFieldCounter++;
                         break;
                 }
 
-                cellIndex++;
+                currentColumn++;
             }
 
             // Process each record's data
             var sectionPos = wdbReader.BaseStream.Position;
             string currentRecordName;
+            var currentRow = 2;  // vertical
             byte[] currentRecordData;
             var strtypelistIndex = 0;
             var currentRecordDataIndex = 0;
-            currentRowIndex = 1;
 
             for (int r = 0; r < wdbVars.RecordCount; r++)
             {
-                cellIndex = 0;
-                currentRow = currentSheet.CreateRow(currentRowIndex);
+                currentColumn = 1;
 
                 _ = wdbReader.BaseStream.Position = sectionPos;
                 currentRecordName = wdbReader.ReadBytesString(16, false);
 
                 Console.WriteLine($"Record: {currentRecordName}");
-                XlsxMethods.WriteToCell(currentRow, cellIndex, currentRecordName, XlsxMethods.CellObjects.String, false);
-                cellIndex++;
+                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.String, currentRecordName, false);
+                currentColumn++;
 
                 currentRecordData = SharedMethods.SaveSectionData(wdbReader, false);
 
@@ -332,8 +325,8 @@ namespace WDBXlsxTool.XIII.Extraction
                             var hexDataVal = "0x" + bitpackedData.ToString("X").PadLeft(8, '0');
 
                             Console.WriteLine($"bitpacked-field_{bitpackedFieldCounter}: {hexDataVal}");
-                            XlsxMethods.WriteToCell(currentRow, cellIndex, hexDataVal, XlsxMethods.CellObjects.String, false);
-                            cellIndex++;
+                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.String, hexDataVal, false);
+                            currentColumn++;
 
                             strtypelistIndex++;
                             currentRecordDataIndex += 4;
@@ -345,8 +338,8 @@ namespace WDBXlsxTool.XIII.Extraction
                             var floatDataVal = SharedMethods.DeriveFloatFromSectionData(currentRecordData, currentRecordDataIndex, true);
 
                             Console.WriteLine($"float-field_{floatFieldCounter}: {floatDataVal}");
-                            XlsxMethods.WriteToCell(currentRow, cellIndex, floatDataVal, XlsxMethods.CellObjects.Float, false);
-                            cellIndex++;
+                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.Float, floatDataVal, false);
+                            currentColumn++;
 
                             strtypelistIndex++;
                             currentRecordDataIndex += 4;
@@ -359,8 +352,8 @@ namespace WDBXlsxTool.XIII.Extraction
                             var derivedString = SharedMethods.DeriveStringFromArray(wdbVars.StringsData, (int)stringDataOffset);
 
                             Console.WriteLine($"!!string-field_{stringFieldCounter}: {derivedString}");
-                            XlsxMethods.WriteToCell(currentRow, cellIndex, derivedString, XlsxMethods.CellObjects.String, false);
-                            cellIndex++;
+                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.String, derivedString, false);
+                            currentColumn++;
 
                             strtypelistIndex++;
                             currentRecordDataIndex += 4;
@@ -372,7 +365,8 @@ namespace WDBXlsxTool.XIII.Extraction
                             var uintDataVal = SharedMethods.DeriveUIntFromSectionData(currentRecordData, currentRecordDataIndex, true);
 
                             Console.WriteLine($"uint-field_{uintFieldCounter}: {uintDataVal}");
-                            XlsxMethods.WriteToCell(currentRow, cellIndex, uintDataVal, XlsxMethods.CellObjects.UInt32, false);
+                            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, currentColumn, XlsxWriterHelpers.CellObjects.UInt32, uintDataVal, false);
+                            currentColumn++;
 
                             strtypelistIndex++;
                             currentRecordDataIndex += 4;
@@ -381,8 +375,7 @@ namespace WDBXlsxTool.XIII.Extraction
                     }
                 }
 
-                currentRowIndex++;
-
+                currentRow++;
                 Console.WriteLine("");
 
                 strtypelistIndex = 0;
@@ -390,7 +383,7 @@ namespace WDBXlsxTool.XIII.Extraction
                 sectionPos += 32;
             }
 
-            XlsxMethods.AutoSizeSheet(currentSheet, (int)wdbVars.RecordCount + 1);
+            XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
         }
     }
 }

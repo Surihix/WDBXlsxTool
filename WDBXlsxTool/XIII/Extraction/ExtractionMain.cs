@@ -1,4 +1,4 @@
-﻿using NPOI.XSSF.UserModel;
+﻿using ClosedXML.Excel;
 using WDBXlsxTool.Support;
 
 namespace WDBXlsxTool.XIII.Extraction
@@ -37,9 +37,8 @@ namespace WDBXlsxTool.XIII.Extraction
                 Console.WriteLine($"Total records: {wdbVars.RecordCount}");
                 Console.WriteLine("");
 
-                using (var wdbWorkbook = new XSSFWorkbook())
+                using (var wdbWorkbook = new XLWorkbook())
                 {
-                    XlsxMethods.SetCellStyles(wdbWorkbook);
                     SectionsParser.MainSectionsToXlsx(wdbVars, wdbWorkbook);
 
                     Console.WriteLine("Parsing records....");
@@ -64,10 +63,7 @@ namespace WDBXlsxTool.XIII.Extraction
                         File.Delete(wdbVars.XlsxFilePath);
                     }
 
-                    using (var wdbWorkbookStream = new FileStream(wdbVars.XlsxFilePath, FileMode.Create, FileAccess.Write))
-                    {
-                        wdbWorkbook.Write(wdbWorkbookStream);
-                    }
+                    wdbWorkbook.SaveAs(wdbVars.XlsxFilePath);
                 }
             }
 
