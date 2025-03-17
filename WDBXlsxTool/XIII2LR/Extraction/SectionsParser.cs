@@ -32,6 +32,7 @@ namespace WDBXlsxTool.XIII2LR.Extraction
                 // !!sheetname
                 if (sectioNameRead == wdbVars.SheetNameSectionName)
                 {
+                    wdbVars.HasSheetName = true;
                     _ = wdbReader.BaseStream.Position = wdbReader.ReadBytesUInt32(true);
                     wdbVars.SheetName = wdbReader.ReadStringTillNull();
                     wdbVars.RecordCount--;
@@ -114,12 +115,22 @@ namespace WDBXlsxTool.XIII2LR.Extraction
 
             if (wdbVars.SheetName == "" || wdbVars.SheetName == null)
             {
-                wdbVars.SheetName = "Not Specified";
+                wdbVars.SheetName = "!!datasheet";
+                wdbVars.HasSheetName = false;
             }
 
             Console.WriteLine("");
             Console.WriteLine("");
-            Console.WriteLine($"{wdbVars.SheetNameSectionName}: {wdbVars.SheetName}");
+
+            if (wdbVars.HasSheetName)
+            {
+                Console.WriteLine($"{wdbVars.SheetNameSectionName}: {wdbVars.SheetName}");
+            }
+            else
+            {
+                Console.WriteLine($"{wdbVars.SheetNameSectionName}: Not Specified");
+            }
+
             Console.WriteLine("");
             Console.WriteLine("");
 
@@ -162,43 +173,47 @@ namespace WDBXlsxTool.XIII2LR.Extraction
             // Write basic info
             currentSheet = wdbWorkbook.AddWorksheet("!!info");
 
-            XlsxWriterHelpers.WriteToCell(currentSheet, 1, 1, XlsxWriterHelpers.CellObjects.String, "records", true);
-            XlsxWriterHelpers.WriteToCell(currentSheet, 1, 2, XlsxWriterHelpers.CellObjects.UInt32, wdbVars.RecordCount, false);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.String, "records", true);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 2, XlsxHelpers.WriteType.UInt32, wdbVars.RecordCount, false);
 
-            XlsxWriterHelpers.WriteToCell(currentSheet, 2, 1, XlsxWriterHelpers.CellObjects.String, "hasStrArray", true);
-            XlsxWriterHelpers.WriteToCell(currentSheet, 2, 2, XlsxWriterHelpers.CellObjects.Boolean, wdbVars.HasStrArraySection, false);
+            XlsxHelpers.WriteToCell(currentSheet, 2, 1, XlsxHelpers.WriteType.String, "hasSheetName", true);
+            XlsxHelpers.WriteToCell(currentSheet, 2, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasSheetName, false);
 
-            var currentRow = 3;
+            XlsxHelpers.WriteToCell(currentSheet, 3, 1, XlsxHelpers.WriteType.String, "hasStrArray", true);
+            XlsxHelpers.WriteToCell(currentSheet, 3, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasStrArraySection, false);
+
+            var currentRow = 4;
 
             // Write array info values
             // if strArray section is
             // present
             if (wdbVars.HasStrArraySection)
             {
-                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxWriterHelpers.CellObjects.String, "bitsPerOffset", true);
-                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxWriterHelpers.CellObjects.UInt32, wdbVars.BitsPerOffset, false);
+                XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, "bitsPerOffset", true);
+                XlsxHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxHelpers.WriteType.UInt32, wdbVars.BitsPerOffset, false);
                 currentRow++;
 
-                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxWriterHelpers.CellObjects.String, "offsetsPerValue", true);
-                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxWriterHelpers.CellObjects.UInt32, wdbVars.OffsetsPerValue, false);
+                XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, "offsetsPerValue", true);
+                XlsxHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxHelpers.WriteType.UInt32, wdbVars.OffsetsPerValue, false);
                 currentRow++;
             }
 
-            XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
+            XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
 
-            // Parse and write strtypelistData
-            // and also write typelistData if
-            // strtypelist is v1
-            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxWriterHelpers.CellObjects.String, "isStrTypelistV1", true);
-            XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxWriterHelpers.CellObjects.Boolean, wdbVars.ParseStrtypelistAsV1, false);
+            // Determine strtypelist version
+            XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, "isStrTypelistV1", true);
+            XlsxHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxHelpers.WriteType.Boolean, wdbVars.ParseStrtypelistAsV1, false);
+            currentRow++;
 
+            // Determine whether typelist exists
+            XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, "hasTypelist", true);
+            XlsxHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasTypelistSection, false);
+
+            // Parse and write strtypelist data
             if (wdbVars.ParseStrtypelistAsV1)
             {
                 currentSheet = wdbWorkbook.AddWorksheet(wdbVars.StrtypelistSectionName);
-                wdbVars.StrtypelistValues = XlsxWriterHelpers.WriteListSectionValues(wdbVars.StrtypelistData, currentSheet);
-
-                currentSheet = wdbWorkbook.AddWorksheet(wdbVars.TypelistSectionName);
-                wdbVars.TypelistValues = XlsxWriterHelpers.WriteListSectionValues(wdbVars.TypelistData, currentSheet);
+                wdbVars.StrtypelistValues = XlsxHelpers.WriteListSectionValues(wdbVars.StrtypelistData, currentSheet);
             }
             else
             {
@@ -213,17 +228,24 @@ namespace WDBXlsxTool.XIII2LR.Extraction
                     strtypelistValue = wdbVars.StrtypelistData[strtypelistbIndex];
                     wdbVars.StrtypelistValues.Add(strtypelistValue);
 
-                    XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxWriterHelpers.CellObjects.UInt32, strtypelistValue, false);
+                    XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.UInt32, strtypelistValue, false);
                     currentRow++;
 
                     strtypelistbIndex++;
                 }
             }
 
+            // Parse and write typelist data
+            if (wdbVars.HasTypelistSection)
+            {
+                currentSheet = wdbWorkbook.AddWorksheet(wdbVars.TypelistSectionName);
+                wdbVars.TypelistValues = XlsxHelpers.WriteListSectionValues(wdbVars.TypelistData, currentSheet);
+            }
+
             // Write version data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.VersionSectionName);
-            XlsxWriterHelpers.WriteToCell(currentSheet, 1, 1, XlsxWriterHelpers.CellObjects.UInt32, SharedMethods.DeriveUIntFromSectionData(wdbVars.VersionData, 0, true), false);
-            XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.UInt32, SharedMethods.DeriveUIntFromSectionData(wdbVars.VersionData, 0, true), false);
+            XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
 
             // Write structitem data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.StructItemSectionName);
@@ -231,11 +253,11 @@ namespace WDBXlsxTool.XIII2LR.Extraction
 
             for (int i = 0; i < wdbVars.FieldCount; i++)
             {
-                XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxWriterHelpers.CellObjects.String, wdbVars.Fields[i], false);
+                XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, wdbVars.Fields[i], false);
                 currentRow++;
             }
 
-            XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
+            XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
         }
     }
 }

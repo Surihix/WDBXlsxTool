@@ -98,15 +98,15 @@ namespace WDBXlsxTool.XIII.Extraction
             // Write basic info
             currentSheet = wdbWorkbook.AddWorksheet("!!info");
 
-            XlsxWriterHelpers.WriteToCell(currentSheet, 1, 1, XlsxWriterHelpers.CellObjects.String, "records", true);
-            XlsxWriterHelpers.WriteToCell(currentSheet, 1, 2, XlsxWriterHelpers.CellObjects.UInt32, wdbVars.RecordCount, false);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.String, "records", true);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 2, XlsxHelpers.WriteType.UInt32, wdbVars.RecordCount, false);
 
-            XlsxWriterHelpers.WriteToCell(currentSheet, 2, 1, XlsxWriterHelpers.CellObjects.String, "IsKnown", true);
+            XlsxHelpers.WriteToCell(currentSheet, 2, 1, XlsxHelpers.WriteType.String, "IsKnown", true);
 
             if (WDBDicts.RecordIDs.ContainsKey(wdbVars.WDBName) && !wdbVars.IgnoreKnown)
             {
                 wdbVars.IsKnown = true;
-                XlsxWriterHelpers.WriteToCell(currentSheet, 2, 2, XlsxWriterHelpers.CellObjects.Boolean, wdbVars.IsKnown, false);
+                XlsxHelpers.WriteToCell(currentSheet, 2, 2, XlsxHelpers.WriteType.Boolean, wdbVars.IsKnown, false);
 
                 wdbVars.SheetName = WDBDicts.RecordIDs[wdbVars.WDBName];
 
@@ -129,23 +129,23 @@ namespace WDBXlsxTool.XIII.Extraction
             }
             else
             {
-                XlsxWriterHelpers.WriteToCell(currentSheet, 2, 2, XlsxWriterHelpers.CellObjects.Boolean, wdbVars.IsKnown, false);
+                XlsxHelpers.WriteToCell(currentSheet, 2, 2, XlsxHelpers.WriteType.Boolean, wdbVars.IsKnown, false);
             }
 
-            XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
+            XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
 
             // Parse and write strtypelist data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.StrtypelistSectionName);
-            wdbVars.StrtypelistValues = XlsxWriterHelpers.WriteListSectionValues(wdbVars.StrtypelistData, currentSheet);
+            wdbVars.StrtypelistValues = XlsxHelpers.WriteListSectionValues(wdbVars.StrtypelistData, currentSheet);
 
             // Parse and write typelist data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.TypelistSectionName);
-            wdbVars.TypelistValues = XlsxWriterHelpers.WriteListSectionValues(wdbVars.TypelistData, currentSheet);
+            wdbVars.TypelistValues = XlsxHelpers.WriteListSectionValues(wdbVars.TypelistData, currentSheet);
 
             // Write version data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.VersionSectionName);
-            XlsxWriterHelpers.WriteToCell(currentSheet, 1, 1, XlsxWriterHelpers.CellObjects.UInt32, SharedMethods.DeriveUIntFromSectionData(wdbVars.VersionData, 0, true), false);
-            XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.UInt32, SharedMethods.DeriveUIntFromSectionData(wdbVars.VersionData, 0, true), false);
+            XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
 
             // Write structitem data
             if (wdbVars.IsKnown && !wdbVars.IgnoreKnown)
@@ -155,11 +155,11 @@ namespace WDBXlsxTool.XIII.Extraction
 
                 for (int i = 0; i < wdbVars.FieldCount; i++)
                 {
-                    XlsxWriterHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxWriterHelpers.CellObjects.String, wdbVars.Fields[i], false);
+                    XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, wdbVars.Fields[i], false);
                     currentRow++;
                 }
 
-                XlsxWriterHelpers.AutoAdjustRowsAndColumns(currentSheet);
+                XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
             }
         }
     }

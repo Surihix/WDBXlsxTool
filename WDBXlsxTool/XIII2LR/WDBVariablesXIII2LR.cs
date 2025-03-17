@@ -8,6 +8,7 @@
         public uint RecordCount;
         public bool HasStrArraySection;
         public bool HasStringSection;
+        public bool HasSheetName;
         public bool ParseStrtypelistAsV1;
         public bool HasTypelistSection;
         public string[]? Fields;

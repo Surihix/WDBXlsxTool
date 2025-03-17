@@ -1,8 +1,23 @@
 {
   "profiles": {
     "WDBXlsxTool": {
+      "commandName": "Project"
+    },
+    "extract 132": {
       "commandName": "Project",
       "commandLineArgs": "-ff132 -x \"S:\\Modding projects\\wdb_test\\r_white.wdb\""
+    },
+    "extract 131": {
+      "commandName": "Project",
+      "commandLineArgs": "-ff131 -x \"S:\\Modding projects\\wdb_test\\shop.wdb\""
+    },
+    "convert 132": {
+      "commandName": "Project",
+      "commandLineArgs": "-ff132 -c \"S:\\Modding projects\\wdb_test\\r_savepoint.xlsx\""
+    },
+    "convert 131": {
+      "commandName": "Project",
+      "commandLineArgs": "-ff131 -c \"S:\\Modding projects\\wdb_test\\shop.xlsx\""
     }
   }
 }

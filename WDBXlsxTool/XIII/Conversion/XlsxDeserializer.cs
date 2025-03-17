@@ -9,6 +9,11 @@ namespace WDBXlsxTool.XIII.Conversion
 
         public static void DeserializeData(string inXlsxFile, WDBVariablesXIII wdbVars)
         {
+            Console.WriteLine("Loading workbook....");
+            Console.WriteLine("");
+
+            SheetIndex = 1;
+
             using (var wdbWorkbook = new XLWorkbook(inXlsxFile))
             {
                 Console.WriteLine("Deserializing main sections....");
@@ -24,10 +29,10 @@ namespace WDBXlsxTool.XIII.Conversion
 
         private static void DeserializeMainSections(XLWorkbook wdbWorkbook, WDBVariablesXIII wdbVars)
         {
-            CheckIfSheetExists(wdbWorkbook, "!!info");
-            CheckIfSheetExists(wdbWorkbook, wdbVars.StrtypelistSectionName);
-            CheckIfSheetExists(wdbWorkbook, wdbVars.TypelistSectionName);
-            CheckIfSheetExists(wdbWorkbook, wdbVars.VersionSectionName);
+            XlsxHelpers.CheckIfSheetExists(wdbWorkbook, "!!info");
+            XlsxHelpers.CheckIfSheetExists(wdbWorkbook, wdbVars.StrtypelistSectionName);
+            XlsxHelpers.CheckIfSheetExists(wdbWorkbook, wdbVars.TypelistSectionName);
+            XlsxHelpers.CheckIfSheetExists(wdbWorkbook, wdbVars.VersionSectionName);
 
             IXLWorksheet currentSheet;
 
@@ -41,7 +46,7 @@ namespace WDBXlsxTool.XIII.Conversion
             // Get strtypelist values
             currentSheet = wdbWorkbook.Worksheet(wdbVars.StrtypelistSectionName);
             SheetIndex++;
-            wdbVars.StrtypelistValues = GetValuesFromListSection(currentSheet);
+            wdbVars.StrtypelistValues = XlsxHelpers.GetValuesForListSection(currentSheet);
 
             if (!wdbVars.IsKnown)
             {
@@ -56,7 +61,7 @@ namespace WDBXlsxTool.XIII.Conversion
             // Get typelist values
             currentSheet = wdbWorkbook.Worksheet(wdbVars.TypelistSectionName);
             SheetIndex++;
-            wdbVars.TypelistValues = GetValuesFromListSection(currentSheet);
+            wdbVars.TypelistValues = XlsxHelpers.GetValuesForListSection(currentSheet);
 
             wdbVars.TypelistData = new byte[wdbVars.TypelistValues.Count * 4];
             wdbVars.TypelistData = SharedMethods.CreateArrayFromUIntList(wdbVars.TypelistValues);
@@ -77,30 +82,12 @@ namespace WDBXlsxTool.XIII.Conversion
             // if the file is known
             if (wdbVars.IsKnown)
             {
-                CheckIfSheetExists(wdbWorkbook, wdbVars.StructItemSectionName);
+                XlsxHelpers.CheckIfSheetExists(wdbWorkbook, wdbVars.StructItemSectionName);
 
                 currentSheet = wdbWorkbook.Worksheet(wdbVars.StructItemSectionName);
                 SheetIndex++;
 
-                string currentVal;
-                var currentRow = 1;
-                var structItemValues = new List<string>();
-
-                while (true)
-                {
-                    currentVal = currentSheet.Cell(currentRow, 1).Value.ToString();
-
-                    if (string.IsNullOrEmpty(currentVal))
-                    {
-                        break;
-                    }
-
-                    structItemValues.Add(currentVal.ToString());
-
-                    currentRow++;
-                }
-
-                wdbVars.Fields = structItemValues.ToArray();
+                wdbVars.Fields = XlsxHelpers.GetFieldsFromSheet(currentSheet);
                 wdbVars.FieldCount = (uint)wdbVars.Fields.Length;
             }
 
@@ -117,41 +104,11 @@ namespace WDBXlsxTool.XIII.Conversion
             }
         }
 
-        private static void CheckIfSheetExists(XLWorkbook workbook, string sheetName)
-        {
-            if (workbook.TryGetWorksheet(sheetName, out _) == false)
-            {
-                SharedMethods.ErrorExit($"Missing {sheetName} in specified xlsx file");
-            }
-        }
-
-        private static List<uint> GetValuesFromListSection(IXLWorksheet currentSheet)
-        {
-            string currentVal;
-            var currentRow = 1;
-            var listSectionValues = new List<uint>();
-
-            while (true)
-            {
-                currentVal = currentSheet.Cell(currentRow, 1).Value.ToString();
-
-                if (string.IsNullOrEmpty(currentVal))
-                {
-                    break;
-                }
-
-                listSectionValues.Add(Convert.ToUInt32(currentVal));
-
-                currentRow++;
-            }
-
-            return listSectionValues;
-        }
-
 
         private static void DeserializeRecords(XLWorkbook wdbWorkbook, WDBVariablesXIII wdbVars)
         {
             var currentSheet = wdbWorkbook.Worksheet(SheetIndex);
+            wdbVars.SheetName = currentSheet.Name;
 
             var currentRow = 2;
             int currentColumn;
