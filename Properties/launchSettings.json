@@ -5,19 +5,19 @@
     },
     "extract 132": {
       "commandName": "Project",
-      "commandLineArgs": "-ff132 -x \"S:\\Modding projects\\wdb_test\\r_white.wdb\""
+      "commandLineArgs": "-ff132 -x \"S:\\Modding projects\\wdb_test\\13-2\\r_fldcam.wdb\""
     },
     "extract 131": {
       "commandName": "Project",
-      "commandLineArgs": "-ff131 -x \"S:\\Modding projects\\wdb_test\\shop.wdb\""
+      "commandLineArgs": "-ff131 -x \"S:\\Modding projects\\wdb_test\\13-1\\fieldcamera.wdb\""
     },
     "convert 132": {
       "commandName": "Project",
-      "commandLineArgs": "-ff132 -c \"S:\\Modding projects\\wdb_test\\r_savepoint.xlsx\""
+      "commandLineArgs": "-ff132 -c \"S:\\Modding projects\\wdb_test\\13-2\\r_fldcam.xlsx\""
     },
     "convert 131": {
       "commandName": "Project",
-      "commandLineArgs": "-ff131 -c \"S:\\Modding projects\\wdb_test\\shop.xlsx\""
+      "commandLineArgs": "-ff131 -c \"S:\\Modding projects\\wdb_test\\13-1\\fieldcamera.xlsx\""
     }
   }
 }

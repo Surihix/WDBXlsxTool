@@ -36,16 +36,18 @@ namespace WDBXlsxTool.XIII.Conversion
 
             IXLWorksheet currentSheet;
 
-            // Get recordCount and determine
-            // if the file is known
+            // Determine if the file
+            // is known
             currentSheet = wdbWorkbook.Worksheet("!!info");
             SheetIndex++;
-            wdbVars.RecordCount = Convert.ToUInt32(currentSheet.Cell(1, 2).Value.ToString());
-            wdbVars.IsKnown = Convert.ToBoolean(currentSheet.Cell(2, 2).Value.ToString());
+
+            wdbVars.IsKnown = Convert.ToBoolean(currentSheet.Cell(1, 2).Value.ToString());
 
             // Get strtypelist values
             currentSheet = wdbWorkbook.Worksheet(wdbVars.StrtypelistSectionName);
             SheetIndex++;
+            wdbVars.RecordCountWithSections++;
+
             wdbVars.StrtypelistValues = XlsxHelpers.GetValuesForListSection(currentSheet);
 
             if (!wdbVars.IsKnown)
@@ -56,27 +58,23 @@ namespace WDBXlsxTool.XIII.Conversion
             wdbVars.StrtypelistData = new byte[wdbVars.StrtypelistValues.Count * 4];
             wdbVars.StrtypelistData = SharedMethods.CreateArrayFromUIntList(wdbVars.StrtypelistValues);
 
-            wdbVars.RecordCountWithSections++;
-
             // Get typelist values
             currentSheet = wdbWorkbook.Worksheet(wdbVars.TypelistSectionName);
             SheetIndex++;
+            wdbVars.RecordCountWithSections++;
+
             wdbVars.TypelistValues = XlsxHelpers.GetValuesForListSection(currentSheet);
 
             wdbVars.TypelistData = new byte[wdbVars.TypelistValues.Count * 4];
             wdbVars.TypelistData = SharedMethods.CreateArrayFromUIntList(wdbVars.TypelistValues);
 
-            wdbVars.RecordCountWithSections++;
-
             // Get version value
             currentSheet = wdbWorkbook.Worksheet(wdbVars.VersionSectionName);
             SheetIndex++;
-            wdbVars.VersionData = BitConverter.GetBytes(Convert.ToUInt32(currentSheet.Cell(1, 1).Value.ToString()));
-            Array.Reverse(wdbVars.VersionData);
-
             wdbVars.RecordCountWithSections++;
 
-            wdbVars.RecordCountWithSections += wdbVars.RecordCount;
+            wdbVars.VersionData = BitConverter.GetBytes(Convert.ToUInt32(currentSheet.Cell(1, 1).Value.ToString()));
+            Array.Reverse(wdbVars.VersionData);
 
             // Get structitem values
             // if the file is known
@@ -116,13 +114,19 @@ namespace WDBXlsxTool.XIII.Conversion
             string recordName;
             string fieldName;
 
-            for (int i = 0; i < wdbVars.RecordCount; i++)
+            while (true)
             {
                 currentColumn = 1;
 
                 recordName = currentSheet.Cell(currentRow, currentColumn).Value.ToString();
                 currentColumn++;
 
+                if (string.IsNullOrEmpty(recordName))
+                {
+                    break;
+                }
+
+                wdbVars.RecordCount++;
                 var currentDataList = new List<object>();
 
                 // Get record data
@@ -175,6 +179,8 @@ namespace WDBXlsxTool.XIII.Conversion
 
                 currentRow++;
             }
+
+            wdbVars.RecordCountWithSections += wdbVars.RecordCount;
         }
     }
 }

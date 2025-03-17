@@ -84,6 +84,18 @@ namespace WDBXlsxTool.Support
         }
 
 
+        public static void WriteStructItemDataToSheet(IXLWorksheet xLWorksheet, uint fieldsCount, string[] fields)
+        {
+            var currentRow = 1;
+
+            for (int i = 0; i < fieldsCount; i++)
+            {
+                WriteToCell(xLWorksheet, currentRow, 1, WriteType.String, fields[i], false);
+                currentRow++;
+            }
+        }
+
+
         public static void CheckIfSheetExists(XLWorkbook workbook, string sheetName)
         {
             if (workbook.TryGetWorksheet(sheetName, out _) == false)

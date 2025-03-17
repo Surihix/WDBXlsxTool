@@ -95,18 +95,14 @@ namespace WDBXlsxTool.XIII.Extraction
         {
             IXLWorksheet currentSheet;
 
-            // Write basic info
+            // Write whether the file is known
             currentSheet = wdbWorkbook.AddWorksheet("!!info");
-
-            XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.String, "records", true);
-            XlsxHelpers.WriteToCell(currentSheet, 1, 2, XlsxHelpers.WriteType.UInt32, wdbVars.RecordCount, false);
-
-            XlsxHelpers.WriteToCell(currentSheet, 2, 1, XlsxHelpers.WriteType.String, "IsKnown", true);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.String, "IsKnown", true);
 
             if (WDBDicts.RecordIDs.ContainsKey(wdbVars.WDBName) && !wdbVars.IgnoreKnown)
             {
                 wdbVars.IsKnown = true;
-                XlsxHelpers.WriteToCell(currentSheet, 2, 2, XlsxHelpers.WriteType.Boolean, wdbVars.IsKnown, false);
+                XlsxHelpers.WriteToCell(currentSheet, 1, 2, XlsxHelpers.WriteType.Boolean, wdbVars.IsKnown, false);
 
                 wdbVars.SheetName = WDBDicts.RecordIDs[wdbVars.WDBName];
 
@@ -129,7 +125,7 @@ namespace WDBXlsxTool.XIII.Extraction
             }
             else
             {
-                XlsxHelpers.WriteToCell(currentSheet, 2, 2, XlsxHelpers.WriteType.Boolean, wdbVars.IsKnown, false);
+                XlsxHelpers.WriteToCell(currentSheet, 1, 2, XlsxHelpers.WriteType.Boolean, wdbVars.IsKnown, false);
             }
 
             XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
@@ -151,14 +147,7 @@ namespace WDBXlsxTool.XIII.Extraction
             if (wdbVars.IsKnown && !wdbVars.IgnoreKnown)
             {
                 currentSheet = wdbWorkbook.AddWorksheet(wdbVars.StructItemSectionName);
-                var currentRow = 1;
-
-                for (int i = 0; i < wdbVars.FieldCount; i++)
-                {
-                    XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, wdbVars.Fields[i], false);
-                    currentRow++;
-                }
-
+                XlsxHelpers.WriteStructItemDataToSheet(currentSheet, wdbVars.FieldCount, wdbVars.Fields);
                 XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
             }
         }

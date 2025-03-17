@@ -169,45 +169,40 @@ namespace WDBXlsxTool.XIII2LR.Extraction
         public static void MainSectionsToXlsx(WDBVariablesXIII2LR wdbVars, XLWorkbook wdbWorkbook)
         {
             IXLWorksheet currentSheet;
+            int currentRow;
 
             // Write basic info
             currentSheet = wdbWorkbook.AddWorksheet("!!info");
 
-            XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.String, "records", true);
-            XlsxHelpers.WriteToCell(currentSheet, 1, 2, XlsxHelpers.WriteType.UInt32, wdbVars.RecordCount, false);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.String, "hasSheetName", true);
+            XlsxHelpers.WriteToCell(currentSheet, 1, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasSheetName, false);
 
-            XlsxHelpers.WriteToCell(currentSheet, 2, 1, XlsxHelpers.WriteType.String, "hasSheetName", true);
-            XlsxHelpers.WriteToCell(currentSheet, 2, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasSheetName, false);
+            XlsxHelpers.WriteToCell(currentSheet, 2, 1, XlsxHelpers.WriteType.String, "hasStrArray", true);
+            XlsxHelpers.WriteToCell(currentSheet, 2, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasStrArraySection, false);
 
-            XlsxHelpers.WriteToCell(currentSheet, 3, 1, XlsxHelpers.WriteType.String, "hasStrArray", true);
-            XlsxHelpers.WriteToCell(currentSheet, 3, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasStrArraySection, false);
+            XlsxHelpers.WriteToCell(currentSheet, 3, 1, XlsxHelpers.WriteType.String, "hasTypelist", true);
+            XlsxHelpers.WriteToCell(currentSheet, 3, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasTypelistSection, false);
 
-            var currentRow = 4;
+            XlsxHelpers.WriteToCell(currentSheet, 4, 1, XlsxHelpers.WriteType.String, "isStrTypelistV1", true);
+            XlsxHelpers.WriteToCell(currentSheet, 4, 2, XlsxHelpers.WriteType.Boolean, wdbVars.ParseStrtypelistAsV1, false);
+
+            XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
 
             // Write array info values
             // if strArray section is
             // present
             if (wdbVars.HasStrArraySection)
             {
-                XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, "bitsPerOffset", true);
-                XlsxHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxHelpers.WriteType.UInt32, wdbVars.BitsPerOffset, false);
-                currentRow++;
+                currentSheet = wdbWorkbook.AddWorksheet(wdbVars.StrArrayInfoSectionName);
 
-                XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, "offsetsPerValue", true);
-                XlsxHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxHelpers.WriteType.UInt32, wdbVars.OffsetsPerValue, false);
-                currentRow++;
+                XlsxHelpers.WriteToCell(currentSheet, 1, 1, XlsxHelpers.WriteType.String, "bitsPerOffset", true);
+                XlsxHelpers.WriteToCell(currentSheet, 1, 2, XlsxHelpers.WriteType.UInt32, wdbVars.BitsPerOffset, false);
+
+                XlsxHelpers.WriteToCell(currentSheet, 2, 1, XlsxHelpers.WriteType.String, "offsetsPerValue", true);
+                XlsxHelpers.WriteToCell(currentSheet, 2, 2, XlsxHelpers.WriteType.UInt32, wdbVars.OffsetsPerValue, false);
+
+                XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
             }
-
-            XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
-
-            // Determine strtypelist version
-            XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, "isStrTypelistV1", true);
-            XlsxHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxHelpers.WriteType.Boolean, wdbVars.ParseStrtypelistAsV1, false);
-            currentRow++;
-
-            // Determine whether typelist exists
-            XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, "hasTypelist", true);
-            XlsxHelpers.WriteToCell(currentSheet, currentRow, 2, XlsxHelpers.WriteType.Boolean, wdbVars.HasTypelistSection, false);
 
             // Parse and write strtypelist data
             if (wdbVars.ParseStrtypelistAsV1)
@@ -249,14 +244,7 @@ namespace WDBXlsxTool.XIII2LR.Extraction
 
             // Write structitem data
             currentSheet = wdbWorkbook.AddWorksheet(wdbVars.StructItemSectionName);
-            currentRow = 1;
-
-            for (int i = 0; i < wdbVars.FieldCount; i++)
-            {
-                XlsxHelpers.WriteToCell(currentSheet, currentRow, 1, XlsxHelpers.WriteType.String, wdbVars.Fields[i], false);
-                currentRow++;
-            }
-
+            XlsxHelpers.WriteStructItemDataToSheet(currentSheet, wdbVars.FieldCount, wdbVars.Fields);
             XlsxHelpers.AutoAdjustRowsAndColumns(currentSheet);
         }
     }

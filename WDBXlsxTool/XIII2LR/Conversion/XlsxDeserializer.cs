@@ -39,42 +39,28 @@ namespace WDBXlsxTool.XIII2LR.Conversion
             currentSheet = wdbWorkbook.Worksheet("!!info");
             SheetIndex++;
 
-            // Get recordCount
-            wdbVars.RecordCount = Convert.ToUInt32(currentSheet.Cell(1, 2).Value.ToString());
-
-            // Check if sheetName
-            // is specified
-            wdbVars.HasSheetName = Convert.ToBoolean(currentSheet.Cell(2, 2).Value.ToString());
-
-            // Check if strArray is
-            // present
-            wdbVars.HasStrArraySection = Convert.ToBoolean(currentSheet.Cell(3, 2).Value.ToString());
-
-            var currentRow = 4;
+            // Get all info
+            wdbVars.HasSheetName = Convert.ToBoolean(currentSheet.Cell(1, 2).Value.ToString());
+            wdbVars.HasStrArraySection = Convert.ToBoolean(currentSheet.Cell(2, 2).Value.ToString());
+            wdbVars.HasTypelistSection = Convert.ToBoolean(currentSheet.Cell(3, 2).Value.ToString());
+            wdbVars.ParseStrtypelistAsV1 = Convert.ToBoolean(currentSheet.Cell(4, 2).Value.ToString());
 
             if (wdbVars.HasStrArraySection)
             {
                 // Get strArrayInfo values
+                XlsxHelpers.CheckIfSheetExists(wdbWorkbook, wdbVars.StrArrayInfoSectionName);
+
+                currentSheet = wdbWorkbook.Worksheet(wdbVars.StrArrayInfoSectionName);
+                SheetIndex++;
                 wdbVars.RecordCountWithSections += 3;
 
-                wdbVars.BitsPerOffset = Convert.ToByte(currentSheet.Cell(currentRow, 2).Value.ToString());
-                currentRow++;
-
-                wdbVars.OffsetsPerValue = Convert.ToByte(currentSheet.Cell(currentRow, 2).Value.ToString());
-                currentRow++;
+                wdbVars.BitsPerOffset = Convert.ToByte(currentSheet.Cell(1, 2).Value.ToString());
+                wdbVars.OffsetsPerValue = Convert.ToByte(currentSheet.Cell(2, 2).Value.ToString());
 
                 wdbVars.StrArrayInfoData = new byte[4];
                 wdbVars.StrArrayInfoData[2] = wdbVars.OffsetsPerValue;
                 wdbVars.StrArrayInfoData[3] = wdbVars.BitsPerOffset;
             }
-
-            // Check and determine how to parse
-            // strtypelist
-            wdbVars.ParseStrtypelistAsV1 = Convert.ToBoolean(currentSheet.Cell(currentRow, 2).Value.ToString());
-            currentRow++;
-
-            // Check if typelist is present
-            wdbVars.HasTypelistSection = Convert.ToBoolean(currentSheet.Cell(currentRow, 2).Value.ToString());
 
             // Get strtypelist values
             if (wdbVars.ParseStrtypelistAsV1)
@@ -111,26 +97,27 @@ namespace WDBXlsxTool.XIII2LR.Conversion
                 XlsxHelpers.CheckIfSheetExists(wdbWorkbook, wdbVars.TypelistSectionName);
                 currentSheet = wdbWorkbook.Worksheet(wdbVars.TypelistSectionName);
                 SheetIndex++;
+                wdbVars.RecordCountWithSections++;
 
                 wdbVars.TypelistValues = XlsxHelpers.GetValuesForListSection(currentSheet);
 
                 wdbVars.TypelistData = new byte[wdbVars.TypelistValues.Count * 4];
                 wdbVars.TypelistData = SharedMethods.CreateArrayFromUIntList(wdbVars.TypelistValues);
-
-                wdbVars.RecordCountWithSections++;
             }
 
             // Get version value
             currentSheet = wdbWorkbook.Worksheet(wdbVars.VersionSectionName);
             SheetIndex++;
+            wdbVars.RecordCountWithSections++;
+
             wdbVars.VersionData = BitConverter.GetBytes(Convert.ToUInt32(currentSheet.Cell(1, 1).Value.ToString()));
             Array.Reverse(wdbVars.VersionData);
 
-            wdbVars.RecordCountWithSections++;
 
             // Get structitem values
             currentSheet = wdbWorkbook.Worksheet(wdbVars.StructItemSectionName);
             SheetIndex++;
+            wdbVars.RecordCountWithSections += 2;
 
             wdbVars.Fields = XlsxHelpers.GetFieldsFromSheet(currentSheet);
             wdbVars.FieldCount = (uint)wdbVars.Fields.Length;
@@ -146,20 +133,16 @@ namespace WDBXlsxTool.XIII2LR.Conversion
             wdbVars.StructItemNumData = BitConverter.GetBytes(wdbVars.FieldCount);
             Array.Reverse(wdbVars.StructItemNumData);
 
-            wdbVars.RecordCountWithSections += 2;
-
             // Get sheetName
             if (wdbVars.HasSheetName)
             {
+                wdbVars.RecordCountWithSections++;
+
                 wdbVars.SheetName = wdbWorkbook.Worksheet(SheetIndex).Name;
 
                 wdbVars.SheetName += "\0";
                 wdbVars.SheetNameData = Encoding.UTF8.GetBytes(wdbVars.SheetName);
-
-                wdbVars.RecordCountWithSections++;
             }
-
-            wdbVars.RecordCountWithSections += wdbVars.RecordCount;
 
             // Determine whether there is
             // a string section
@@ -189,13 +172,19 @@ namespace WDBXlsxTool.XIII2LR.Conversion
             string recordName;
             string fieldName;
 
-            for (int i = 0; i < wdbVars.RecordCount; i++)
+            while (true)
             {
                 currentColumn = 1;
 
                 recordName = currentSheet.Cell(currentRow, currentColumn).Value.ToString();
                 currentColumn++;
 
+                if (string.IsNullOrEmpty(recordName))
+                {
+                    break;
+                }
+
+                wdbVars.RecordCount++;
                 var currentDataList = new List<object>();
 
                 // Get record data
@@ -219,6 +208,8 @@ namespace WDBXlsxTool.XIII2LR.Conversion
 
                 currentRow++;
             }
+
+            wdbVars.RecordCountWithSections += wdbVars.RecordCount;
         }
     }
 }
