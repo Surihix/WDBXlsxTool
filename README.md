@@ -22,7 +22,7 @@ This program allows you to convert the WDB database files from the FF13 game tri
 
 - The WDB file or xlsx file has to be specified after the game code and the tool action argument switches.
 
-- When using the `-ff131` game code switch, you can use the `-xi` tool action argument switch, to prevent generating field names for the records when its converted to JSON file.
+- When using the `-ff131` game code switch, you can use the `-xi` tool action argument switch, to prevent generating field names for the records when its converted to xlsx file.
 
 - Its highly recommended to use Microsoft excel to edit/view the xlsx files. you can try other softwares, but do know that if it doesn't follow the xlsx format that Excel uses, then there is a chance of the tool to fail or mess up somewhere in the conversion process.
 
