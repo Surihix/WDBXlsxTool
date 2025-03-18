@@ -24,11 +24,11 @@ This program allows you to convert the WDB database files from the FF13 game tri
 
 - When using the `-ff131` game code switch, you can use the `-xi` tool action argument switch, to prevent generating field names for the records when its converted to xlsx file.
 
-- Its highly recommended to use Microsoft excel to edit/view the xlsx files. you can try other softwares, but do know that if it doesn't follow the xlsx format that Excel uses, then there is a chance of the tool to fail or mess up somewhere in the conversion process.
+- Its highly recommended to use Microsoft excel to edit/view the xlsx files. you can try other softwares, but do know that if it doesn't follow the xlsx format that excel uses, then there is a chance for tool to fail or mess up somewhere during the WDB conversion process.
 
 - Field names will be present in the xlsx file only for some WDB files from 13-1. refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/WDB-Field-Names) for information about the field names.
 
-- Floating point values will be written as string in the xlsx file. this is done to ensure that there is no precision loss in the value when its written to the xlsx file. you can however edit and add in your values correctly in the proper floating point format and the tool will parse the value as float when converting back to WDB format.
+- Floating point values will be written as string in the xlsx file and this is done to ensure that there is no precision loss in the value when its written to the xlsx file. you can however edit and add in your values correctly in the proper floating point format and the tool will parse the value as float when converting back to WDB format.
 
 - If you are adding new records in the WDB file, then make sure to add your new records according to the alphabetical order. this would require adding them in between two existing records or after the last record.
 
