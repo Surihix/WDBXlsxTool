@@ -33,7 +33,7 @@
 
             Console.WriteLine("");
             Console.WriteLine("");
-            Console.WriteLine("Finished building wdb file for extracted json data");
+            Console.WriteLine("Finished building wdb file for extracted xlsx data");
         }
     }
 }
