@@ -15,15 +15,20 @@ namespace WDBXlsxTool.XIII2LR.Conversion
 
             SheetIndex = 1;
 
-            using (var wdbWorkbook = new XLWorkbook(inXlsxFile))
+            using (var wdbDataStream = new FileStream(inXlsxFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                Console.WriteLine("Deserializing main sections....");
-                Console.WriteLine("");
-                DeserializeMainSections(wdbWorkbook, wdbVars);
+                wdbDataStream.Seek(0, SeekOrigin.Begin);
 
-                Console.WriteLine("Deserializing records....");
-                Console.WriteLine("");
-                DeserializeRecords(wdbWorkbook, wdbVars);
+                using (var wdbWorkbook = new XLWorkbook(wdbDataStream))
+                {
+                    Console.WriteLine("Deserializing main sections....");
+                    Console.WriteLine("");
+                    DeserializeMainSections(wdbWorkbook, wdbVars);
+
+                    Console.WriteLine("Deserializing records....");
+                    Console.WriteLine("");
+                    DeserializeRecords(wdbWorkbook, wdbVars);
+                }
             }
         }
 
