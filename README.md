@@ -24,7 +24,7 @@ This program allows you to convert the WDB database files from the FF13 game tri
 
 - When using the `-ff131` game code switch, you can use the `-xi` tool action argument switch, to prevent generating field names for the records when its converted to xlsx file.
 
-- Its highly recommended to use Microsoft excel to edit/view the xlsx files. you can try other softwares, but do know that if it doesn't follow the xlsx format that excel uses, then there is a chance for tool to fail or mess up somewhere during the WDB conversion process.
+- Its highly recommended to use Microsoft excel to edit/view the xlsx files. you can try other softwares, but do know that if it doesn't follow the xlsx format that excel uses, then there is a chance for the tool to fail or mess up somewhere during the WDB conversion process.
 
 - Field names will be present in the xlsx file only for some WDB files from 13-1. refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/WDB-Field-Names) for information about the field names.
 
