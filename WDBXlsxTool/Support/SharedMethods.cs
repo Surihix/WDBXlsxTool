@@ -11,6 +11,7 @@ namespace WDBXlsxTool.Support
             Environment.Exit(1);
         }
 
+
         public static void CheckSectionName(BinaryReader br, string sectionName)
         {
             if (br.ReadBytesString(16, false) != sectionName)
